@@ -23,8 +23,8 @@ encode(str)
 
 Escape unsafe characters in `str` with html entities.
 
-decode
-------
+decode(str)
+-----------
 
 Convert html entities in `str` back to raw text.
 
