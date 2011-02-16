@@ -9,8 +9,8 @@ exports.amp = function () {
 };
 
 exports.html = function () {
-    var a = '<html> © π';
-    var b = '&lt;html&gt; &copy; &pi;';
+    var a = '<html> © π " \'';
+    var b = '&lt;html&gt; &copy; &pi; &quot; &apos;';
     assert.eql(ent.encode(a), b);
     assert.eql(ent.decode(b), a);
 };
