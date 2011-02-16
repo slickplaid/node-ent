@@ -17,10 +17,16 @@ exports.encode = function (str) {
     
     return str.split('').map(function (c) {
         var e = revEntities[c];
-        return e
-            ? '&' + (e.match(/;$/) ? e : e + ';')
-            : c
-        ;
+        var cc = c.charCodeAt(0);
+        if (e) {
+            return '&' + (e.match(/;$/) ? e : e + ';');
+        }
+        else if (cc > 127) {
+            return '&#' + cc + ';';
+        }
+        else {
+            return c;
+        }
     }).join('');
 };
 
