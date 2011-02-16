@@ -11,37 +11,51 @@ Object.keys(entities).forEach(function (key) {
 });
 
 exports.encode = function (str) {
-    return str.split('').map(function (c) {
-        var e = revEntities[c];
-        if (e) {
-            return e.match(/;$/) ? e : e + ';';
+    if (typeof str === 'string') {
+        return str.split('').map(function (c) {
+            var e = revEntities[c];
+            return (e && (e.match(/;$/) ? e : e + ';')) || c;
+        }).join('');
+    }
+    else if (Buffer.isBuffer(str)) {
+        var buf = new Buffer(str.length);
+        for (var i = 0; i < str.length; i++) {
+            var c = str[i];
+            var e = revEntities[c];
+            buf[i] = (e && (e.match(/;$/) ? e : e + ';')) || c;
         }
-        else {
-            return c;
-        }
-    }).join('');
+        return buf;
+    }
+    else {
+        throw new TypeError('Expected a Buffer or String');
+    }
 };
 
 exports.decode = function (str) {
-    str
-        .replace(/&#(\d+);?/, function (_, code) {
-            return String.fromCharCode(code);
-        })
-        .replace(/&([^;\W]+;?)/g, function (m, e) {
-            var ee = e.replace(/;$/, '');
-            var target = entities[e]
-                || (e.match(/;$/) && entities[ee])
-            ;
-            
-            if (typeof target === 'number') {
-                return String.fromCharCode(target);
-            }
-            else if (typeof target === 'string') {
-                return target;
-            }
-            else {
-                return m;
-            }
-        })
-    ;
+    if (typeof str === 'string') {
+        str
+            .replace(/&#(\d+);?/, function (_, code) {
+                return String.fromCharCode(code);
+            })
+            .replace(/&([^;\W]+;?)/g, function (m, e) {
+                var ee = e.replace(/;$/, '');
+                var target = entities[e]
+                    || (e.match(/;$/) && entities[ee])
+                ;
+                
+                if (typeof target === 'number') {
+                    return String.fromCharCode(target);
+                }
+                else if (typeof target === 'string') {
+                    return target;
+                }
+                else {
+                    return m;
+                }
+            })
+        ;
+    }
+    else {
+        throw new TypeError('Expected a String');
+    }
 };
