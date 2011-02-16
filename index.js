@@ -11,51 +11,43 @@ Object.keys(entities).forEach(function (key) {
 });
 
 exports.encode = function (str) {
-    if (typeof str === 'string') {
-        return str.split('').map(function (c) {
-            var e = revEntities[c];
-            return (e && (e.match(/;$/) ? e : e + ';')) || c;
-        }).join('');
+    if (typeof str !== 'string') {
+        throw new TypeError('Expected a String');
     }
-    else if (Buffer.isBuffer(str)) {
-        var buf = new Buffer(str.length);
-        for (var i = 0; i < str.length; i++) {
-            var c = str[i];
-            var e = revEntities[c];
-            buf[i] = (e && (e.match(/;$/) ? e : e + ';')) || c;
-        }
-        return buf;
-    }
-    else {
-        throw new TypeError('Expected a Buffer or String');
-    }
+    
+    return str.split('').map(function (c) {
+        var e = revEntities[c];
+        return e
+            ? '&' + (e.match(/;$/) ? e : e + ';')
+            : c
+        ;
+    }).join('');
 };
 
 exports.decode = function (str) {
-    if (typeof str === 'string') {
-        str
-            .replace(/&#(\d+);?/, function (_, code) {
-                return String.fromCharCode(code);
-            })
-            .replace(/&([^;\W]+;?)/g, function (m, e) {
-                var ee = e.replace(/;$/, '');
-                var target = entities[e]
-                    || (e.match(/;$/) && entities[ee])
-                ;
-                
-                if (typeof target === 'number') {
-                    return String.fromCharCode(target);
-                }
-                else if (typeof target === 'string') {
-                    return target;
-                }
-                else {
-                    return m;
-                }
-            })
-        ;
-    }
-    else {
+    if (typeof str !== 'string') {
         throw new TypeError('Expected a String');
     }
+    
+    return str
+        .replace(/&#(\d+);?/, function (_, code) {
+            return String.fromCharCode(code);
+        })
+        .replace(/&([^;\W]+;?)/g, function (m, e) {
+            var ee = e.replace(/;$/, '');
+            var target = entities[e]
+                || (e.match(/;$/) && entities[ee])
+            ;
+            
+            if (typeof target === 'number') {
+                return String.fromCharCode(target);
+            }
+            else if (typeof target === 'string') {
+                return target;
+            }
+            else {
+                return m;
+            }
+        })
+    ;
 };
